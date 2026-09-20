@@ -1,0 +1,104 @@
+# GOG executable as supplied locally. Addresses are tied to this exact image.
+[game]
+id = "metal-fatigue"
+name = "Metal Fatigue"
+app_name = "MetalFatigueRecomp"
+bundle_id = "dev.recompkit.metalfatigue"
+executable = "MFatigue.exe"
+sha256 = "26d428f1ee8da3c2c499d85f2c3f002fa19e4cd63f4ae9cdc82c08d9b8547cde"
+image_base = 0x00400000
+entry_point = 0x004c6e5e
+guest_root = 'C:\GOG Games\Metal Fatigue'
+developer_exe = "original/gog/MFatigue.exe"
+# The renderer's preferred base is 0x10000000, beyond the default arena.
+guest_size = 0x11000000
+
+[translate]
+resumable_stacks = true
+listings = "analysis/decompiled/MFatigue.exe"
+globals = "globals.toml"
+animation_counter = 0x0057be00
+volatile_reads = []
+# Observed gameplay virtual call at 004b142e; both branches return with RET 8.
+entry_points = [0x00490ba0]
+overrides = "native/display_overrides.h"
+
+[translate.native]
+header = "native/display_overrides.h"
+sources = ["native/display.c"]
+
+[modules.aux.directx]
+name = "DirectXRendEng.dll"
+path = "original/gog/_unsupported/DirectXRendEng.dll"
+sha256 = "df4b0e0b92122cebfb7ba845b3a4a272962b4fd98a866ef3a11b89f7003e430e"
+base = 0x10000000
+size = 0x000b6000
+listings = "analysis/decompiled/DirectXRendEng.dll"
+function_alignment = 16
+# Observed virtual call at 1000bad0; the PE bytes contain its renderer method.
+entry_points = [0x1000d250, 0x1000d860]
+
+[hooks]
+# Unidentified hooks use zero-filled .rsrc page padding, beyond its virtual
+# extent at 0x0057b8f8 and below SizeOfImage's end at 0x0057c000.
+# These are NOT recovered game symbols. Replace only with verified addresses.
+frame_clock_begin = 0x0057be10
+frame_clock_wait = 0x0057be14
+frame_clock_wait_clamp = 0x0057be18
+frame_clock_clamp_deadline = 0x0057be20
+frame_clock_wait_deadline = 0x0057be24
+cursor_surface_ptrs = [0x0057be30, 0x0057be34]
+mouse_vtable = 0x0057be40
+mouse_device_ptr = 0x0057be44
+mouse_device_right = 0x0057be48
+camera = 0x0057be50
+
+[mods]
+builtin = "none"
+
+[settings]
+rows = ["window", "performance_overlay", "controls"]
+
+[controls]
+default_layout = "hidden"
+pad = "off"
+
+[launcher]
+title = "Metal Fatigue"
+install_names = ["Metal Fatigue"]
+gog_ids = ["1769957642"]
+min_free_mb = 1200
+
+[setup]
+required_dirs = ["TBD", "Tutorial", "MUSIC", "_unsupported"]
+
+[bundle]
+exclude = ["__redist", "app", "commonappdata", "tmp", "*.pdf", "*.ico",
+           "*.hashdb", "*.info", "*.script"]
+
+# One-based disc track order; track 1 contains game data.
+[media]
+cd_tracks = ["",
+    "MUSIC/Track02.ogg",
+    "MUSIC/Track03.ogg",
+    "MUSIC/Track04.ogg",
+    "MUSIC/Track05.ogg",
+    "MUSIC/Track06.ogg",
+    "MUSIC/Track07.ogg",
+    "MUSIC/Track08.ogg",
+    "MUSIC/Track09.ogg",
+    "MUSIC/Track10.ogg",
+    "MUSIC/Track11.ogg",
+    "MUSIC/Track12.ogg",
+    "MUSIC/Track13.ogg",
+    "MUSIC/Track14.ogg",
+    "MUSIC/Track15.ogg",
+    "MUSIC/Track16.ogg",
+    "MUSIC/Track17.ogg",
+    "MUSIC/Track18.ogg",
+    "MUSIC/Track19.ogg",
+    "MUSIC/Track20.ogg",
+    "MUSIC/Track21.ogg",
+    "MUSIC/Track22.ogg",
+    "MUSIC/Track23.ogg",
+]

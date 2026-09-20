@@ -1,0 +1,13 @@
+/original/
+/analysis/
+/build/
+/.venv/
+/.tools/
+/.pytest_cache/
+/.omx/
+__pycache__/
+*.pyc
+*.log
+.DS_Store
+.env
+.env.*

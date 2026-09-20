@@ -1,0 +1,86 @@
+name: Checks
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  configure:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            python: .venv/bin/python
+          - os: ubuntu-24.04
+            python: .venv/bin/python
+          - os: windows-2025
+            python: .venv/Scripts/python
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          submodules: recursive
+      # The kit pins numpy 2.0.2, which has wheels up to Python 3.12; a
+      # runner's newer default would build it from source and fail.
+      - uses: actions/setup-python@v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Enter the Visual Studio developer environment (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+      - name: Contributor tools
+        run: |
+          python3 -m venv .venv
+          ${{ matrix.python }} -m pip install -r kit/requirements-dev.txt
+      - name: Portable tests (the kit's suites plus this game's config)
+        run: |
+          ${{ matrix.python }} tools/test.py
+          ${{ matrix.python }} -m pytest -q tests
+      - name: Install clang, lld and SDL3's window and audio headers (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq clang lld build-essential pkg-config libasound2-dev \
+            libpulse-dev libaudio-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
+            libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
+            libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
+            libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
+            libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev \
+            mesa-vulkan-drivers glslc
+      - name: Link-only configure of this game through the kit
+        run: ${{ matrix.python }} tools/build.py --stub
+      - name: iOS stub compile (no signing)
+        if: runner.os == 'macOS'
+        run: ${{ matrix.python }} tools/build.py --stub --target ios
+
+  android:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Contributor tools and pinned Android NDK
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python -m pip install -r kit/requirements-dev.txt
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;27.2.12479018" "platforms;android-36" "build-tools;37.0.0"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_ENV"
+      - name: Build the Android host APK without game code or data
+        run: .venv/bin/python tools/build.py --stub --target android --no-install --jobs 4

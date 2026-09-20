@@ -1,0 +1,9 @@
+id = "metal-fatigue.display"
+name = "Native display modes"
+version = "1.0.0"
+api = 1
+game = "26d428f1ee8da3c2c499d85f2c3f002fa19e4cd63f4ae9cdc82c08d9b8547cde"
+affects_simulation = false
+
+[plugin]
+path = "display.dylib"
