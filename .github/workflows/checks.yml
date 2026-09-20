@@ -47,6 +47,7 @@ jobs:
           ${{ matrix.python }} -m pip install -r kit/requirements-dev.txt
       - name: Portable tests (the kit's suites plus this game's config)
         run: |
+          ${{ matrix.python }} tools/check_repo.py
           ${{ matrix.python }} tools/test.py
           ${{ matrix.python }} -m pytest -q tests
       - name: Install clang, lld and SDL3's window and audio headers (Linux)

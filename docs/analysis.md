@@ -404,3 +404,39 @@ Logs: `build/build-app-first-run.log`, `build/build-headless-first-run.log`,
 `build/build-android-first-run.log`. All artifacts, generated translations,
 original game inputs and player profiles remain local and ignored. Public CI
 builds link the host against a stub translation; they do not run the game.
+
+### Final cross-platform build check
+
+The final translated Linux arm64 and Windows x86-64 applications both linked and
+packaged successfully. Linux used Ubuntu 24.04 with clang 18 inside a local
+container; Windows used llvm-mingw 20260908 UCRT from the same container. The
+toolchain archive SHA-256 was
+`c907dd2302a292b663add18752a55ce9d544ca0fd19cf33c086ca242d5994ea6`.
+Generated code remained on this machine. Linux includes FFmpeg shared libraries.
+The Windows cross preset has FFmpeg disabled, so that artifact cannot play the
+AVI movies or Ogg CD tracks. Neither build establishes gameplay on its target OS.
+
+The cross-build found missing `<cstdlib>` includes and a duplicate default core
+plugin table on COFF. The empty table now lives in a fallback archive, loaded only
+when the host has no compiled plugin table. Linux, Windows, macOS, iOS and Android
+were rebuilt after this change. The focused hook/settings regression still passed
+all 39 checks. Both desktop packages contain the core display manifest, and the
+apps compile its plugin directly. The cross-build packager now stages the Windows
+output directory rather than looking for the host OS's binary.
+
+Private local artifacts:
+
+| Target | Artifact |
+| --- | --- |
+| macOS arm64 | `build/MetalFatigueRecomp.app` |
+| iOS arm64 | `build/ios/Release/MetalFatigueRecomp.app` |
+| Android arm64 | `build/android/app/build/outputs/apk/debug/app-debug.apk` |
+| Linux arm64 | `build/platforms/linux/build/package/MetalFatigueRecomp-linux-aarch64.tar.gz` |
+| Windows x86-64 | `build/platforms/windows/build/windows/package/MetalFatigueRecomp/` |
+
+Final build logs: `build/build-app-platform-final.log`,
+`build/build-ios-platform-final.log`, `build/build-android-platform-final.log`,
+`build/platforms/linux-final.log` and `build/platforms/windows-final.log`.
+The reused isolated startup profile retained `Resolution=5` and `MusicLevel=7`,
+confirming that first-run defaults do not overwrite existing preferences. The
+interactive game remained closed during packaging and publication.
