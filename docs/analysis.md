@@ -413,8 +413,10 @@ container; Windows used llvm-mingw 20260908 UCRT from the same container. The
 toolchain archive SHA-256 was
 `c907dd2302a292b663add18752a55ce9d544ca0fd19cf33c086ca242d5994ea6`.
 Generated code remained on this machine. Linux includes FFmpeg shared libraries.
-The Windows cross preset has FFmpeg disabled, so that artifact cannot play the
-AVI movies or Ogg CD tracks. Neither build establishes gameplay on its target OS.
+At this checkpoint the Windows cross preset had FFmpeg disabled, so that
+artifact could not play AVI movies or Ogg CD tracks. This limitation is fixed in
+the media cross-build check below. Neither build establishes gameplay on its
+target OS.
 
 The cross-build found missing `<cstdlib>` includes and a duplicate default core
 plugin table on COFF. The empty table now lives in a fallback archive, loaded only
@@ -440,3 +442,65 @@ Final build logs: `build/build-app-platform-final.log`,
 The reused isolated startup profile retained `Resolution=5` and `MusicLevel=7`,
 confirming that first-run defaults do not overwrite existing preferences. The
 interactive game remained closed during packaging and publication.
+
+
+### Windows movies and Ogg cross-build (2026-09-21)
+
+The `windows-cross` and inherited stub preset now enable FFmpeg. Dependency
+configuration distinguishes the build host from the Windows target: Linux/macOS
+use their POSIX shell and GNU make, with an explicit Windows architecture and
+llvm-mingw compiler, binutils, resource compiler and cross prefix. The prefix is
+required for FFmpeg's `dlltool` invocation; selecting only the compiler leaves
+import-library installation broken. The AVI adapter now includes `<cstdlib>`
+for `std::abs`, and the GDI test includes `<algorithm>` for `std::fill`, which
+llvm-mingw's libc++ does not supply through unrelated headers.
+
+Using the same Ubuntu arm64 container and llvm-mingw 20260908 toolchain recorded
+above, the full translated Windows app and every native test binary built:
+
+```sh
+docker run --rm \
+  -v "$PWD/build/platforms/windows:/work" \
+  -v "$PWD/build/platforms/toolchain:/toolchain:ro" \
+  -e LLVM_MINGW_ROOT=/toolchain -w /work metal-fatigue-builder:local \
+  python tools/build.py --preset windows-cross --target app --jobs 6
+
+docker run --rm \
+  -v "$PWD/build/platforms/windows:/work" \
+  -v "$PWD/build/platforms/toolchain:/toolchain:ro" \
+  -e LLVM_MINGW_ROOT=/toolchain -w /work metal-fatigue-builder:local \
+  python kit/tools/test.py --game-dir /work --preset windows-cross --compile-only --jobs 6
+```
+
+The package at `build/platforms/windows/build/windows/package/MetalFatigueRecomp/`
+contains `MetalFatigueRecomp.exe`, `avformat-61.dll`, `avcodec-61.dll`,
+`avutil-59.dll`, the core display manifest and `resources/ffmpeg-NOTICE.md`.
+PE inspection confirms AMD64 throughout: the executable imports these DLLs,
+and their remaining imports are Windows system/UCRT libraries. No additional
+compiler runtime DLL is required. FFmpeg's `config_components.h` enables
+Indeo 5, Vorbis, AVI and Ogg.
+
+For execution checks, `dx_tests.exe` and only the three DLLs copied from the
+package were placed in `build/platforms/media-check/`. CrossOver ran them using
+a new isolated `media-check` bottle under `build/platforms/wine-bottles/`, leaving
+existing bottles untouched. Environment variables supplied Windows `Z:` paths
+to the local original assets:
+
+| Probe | Result |
+| --- | --- |
+| `RECOMP_TEST_AVI`, `TBD/LogoCinematic.avi` | 150 frames decoded through AVIFile/Indeo imports; 147 changing images, nonblack output, exit 0. |
+| `RECOMP_TEST_AUDIO`, `MUSIC/Track02.ogg` | 355,584 interleaved samples, 44,100 Hz stereo, peak 10,291, exit 0. |
+| Portable tooling | 415 passed, 3 skipped. |
+| Game-specific assertions | 5 passed. |
+
+The audio probe uses the same `mf::Media` decoder as file-backed CD music.
+These are headless Windows-binary decoder checks under Wine, not audible output
+or native Windows gameplay. The game stayed closed. A new public CI job builds
+the Windows stub with media, checks codec configuration, and decodes a generated
+Ogg sine tone with isolated copies of the Windows DLLs. No game assets are used
+or uploaded by CI.
+
+Local evidence: `build/platforms/windows-media-build.log`,
+`build/platforms/windows-media-tests-build.log`, `build/platforms/windows-avi-probe.log`,
+`build/platforms/windows-ogg-probe.log`, `build/platforms/media-portable-tests.log`
+and `build/platforms/media-game-tests.log`.

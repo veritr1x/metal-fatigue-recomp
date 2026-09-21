@@ -88,7 +88,7 @@ The kit uses SDL3, Metal on Apple platforms and Vulkan on Linux, Windows and And
 | iOS / iPadOS | `.venv/bin/python tools/build.py --target ios --team <TEAM_ID> --no-install` | Translated arm64 app built and signing verified; device play unverified. |
 | Android | `.venv/bin/python tools/build.py --target android --no-install` | Translated arm64 APK built; device play unverified. |
 | Linux | `.venv/bin/python tools/build.py --target app --jobs 8` | Translated arm64 app/package built on Ubuntu 24.04; gameplay unverified. |
-| Windows | `.venv/Scripts/python tools/build.py --target app --jobs 8` | Translated x86-64 app/package cross-built; gameplay unverified. |
+| Windows | `.venv/Scripts/python tools/build.py --target app --jobs 8` | Translated x86-64 app/package cross-built; AVI/Ogg decoding checked under Wine; Windows gameplay unverified. |
 
 iOS requires Xcode, an iOS SDK and a development team. Android requires JDK 17+,
 SDK platform 36, build tools 37.0.0 and NDK 27.2.12479018; set `JAVA_HOME`,
@@ -99,9 +99,10 @@ not be uploaded as public artifacts. See the kit's
 [contributor guide](kit/CONTRIBUTING.md) for platform prerequisites.
 
 The local Windows cross-build uses `LLVM_MINGW_ROOT` and
-`tools/build.py --preset windows-cross --target app`. That preset disables
-FFmpeg: movies and Ogg CD music require a video-enabled build. The native Windows
-build can enable FFmpeg with the MSYS2 prerequisites in the kit guide.
+`tools/build.py --preset windows-cross --target app`. That preset enables
+FFmpeg for AVI/Indeo movies and Ogg CD music and bundles all three media DLLs
+with their notice. Cross-building needs a POSIX shell and GNU make; a native
+Windows build uses the MSYS2 prerequisites in the kit guide.
 Linux packages go under `build/package`; Windows cross-packages go under
 `build/windows/package`. Build evidence and local artifact paths are recorded in
 [analysis](docs/analysis.md). Public CI uses stub translations on all platforms;

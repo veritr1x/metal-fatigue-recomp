@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Include AVI/Indeo movies and Ogg music support in Windows cross-builds, with
+  the three FFmpeg DLLs and dependency notice in the desktop package.
 - Initial native Metal Fatigue port using the GOG executable and DirectX renderer.
 - Render terrain, units, HUD, minimap and campaign previews; physical unit movement verified.
 - Play AVI/Indeo movies, Miles music/effects and waveform audio through the host.
