@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Refresh the fullscreen DirectDraw window after movie mode changes through
+  the updated shared runtime.
+
 - Merge the port's runtime history into the shared kit and load its hash-pinned
   DirectX renderer from `_unsupported/` inside relocated iPad installations.
   The signed iPad build now reaches the opening cinematic.

@@ -547,3 +547,15 @@ Local evidence: `build/ipad-update-config-tests.log`,
 `build/ipad-update-device-renderer.log` and
 `build/ipad-update-device-renderer.png`. Original assets, app bundles, profiles
 and logs remain private and ignored.
+
+
+The final shared pin is `bbdc3b0`, including exclusive DirectDraw window refreshes
+after movie mode switches. Desktop and signed iOS builds were repeated; all five
+configuration tests passed, and the iPad app was updated in place again. The
+seven-step menu smoke passed with the same core-plugin root and an explicit
+`RECOMP_SMOKE_DRAWABLE=1280x960`; its menu capture was visually verified. A run
+without that drawable setting produced a black smoke composite and is not
+counted as visual proof. No mission was exercised.
+Evidence: `build/display-mode-smoke-1280/host.log`,
+`build/display-mode-smoke-1280/menu.png`, `build/display-mode-ios-build.log`
+and `build/display-mode-install.json`.
