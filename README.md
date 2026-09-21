@@ -85,7 +85,7 @@ The kit uses SDL3, Metal on Apple platforms and Vulkan on Linux, Windows and And
 | Platform | Command | Validation |
 | --- | --- | --- |
 | macOS | `.venv/bin/python tools/build.py --target app --jobs 8` | Native mission, unit movement, movies, audio, campaign animation, resolution changes and clean exit verified. |
-| iOS / iPadOS | `.venv/bin/python tools/build.py --target ios --team <TEAM_ID> --no-install` | Translated arm64 app built and signing verified; device play unverified. |
+| iOS / iPadOS | `.venv/bin/python tools/build.py --target ios --team <TEAM_ID> --no-install` | Signed app installed on iPad; opening cinematic verified. Mission play unverified. |
 | Android | `.venv/bin/python tools/build.py --target android --no-install` | Translated arm64 APK built; device play unverified. |
 | Linux | `.venv/bin/python tools/build.py --target app --jobs 8` | Translated arm64 app/package built on Ubuntu 24.04; gameplay unverified. |
 | Windows | `.venv/Scripts/python tools/build.py --target app --jobs 8` | Translated x86-64 app/package cross-built; AVI/Ogg decoding checked under Wine; Windows gameplay unverified. |

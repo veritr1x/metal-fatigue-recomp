@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Merge the port's runtime history into the shared kit and load its hash-pinned
+  DirectX renderer from `_unsupported/` inside relocated iPad installations.
+  The signed iPad build now reaches the opening cinematic.
+
+- Update the shared runtime with iPad touch-coordinate, stick-motion and frame-color
+  fixes, plus regression coverage for simultaneous keys and mapped pad controls.
+
+- Preserve visible gamepad sticks and buttons when switching from a
+  collapsed keyboard.
+
+- Hide the on-screen keyboard HIDE/KEYS tabs when a hardware keyboard or
+  controller auto-hides the controls; retain the layout switch and saved visibility.
+
 - Include AVI/Indeo movies and Ogg music support in Windows cross-builds, with
   the three FFmpeg DLLs and dependency notice in the desktop package.
 - Initial native Metal Fatigue port using the GOG executable and DirectX renderer.

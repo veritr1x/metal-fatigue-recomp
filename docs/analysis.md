@@ -504,3 +504,46 @@ Local evidence: `build/platforms/windows-media-build.log`,
 `build/platforms/windows-media-tests-build.log`, `build/platforms/windows-avi-probe.log`,
 `build/platforms/windows-ogg-probe.log`, `build/platforms/media-portable-tests.log`
 and `build/platforms/media-game-tests.log`.
+
+### Shared runtime merge and iPad installation (2026-09-21)
+
+The port's kit history through `c5e10fe` is merged into shared kit main at
+`98e0549`, preserving the tested iPad input fixes. This checkout now pins
+`9e97515`, which also initializes the settings handler in scripted desktop
+smokes and resolves auxiliary modules inside relocated installation folders.
+
+The first physical iPad launch exposed a missing renderer: the loader searched
+beside `MFatigue.exe`, while the pinned renderer lives at
+`_unsupported/DirectXRendEng.dll`. The kit now tries the configured relative
+subfolder under the actual executable directory before its development-path
+fallback. Both original hashes remain enforced and no original file changed.
+
+Validation used isolated desktop profiles and these commands:
+
+```sh
+../recomp-kit/.venv/bin/python -m pytest -q tests
+../recomp-kit/.venv/bin/python tools/build.py --target smoke --regenerate --jobs 6
+../recomp-kit/.venv/bin/python tools/build.py --target app --jobs 6
+../recomp-kit/.venv/bin/python tools/test.py --compile-only --jobs 6
+RECOMP_PYTHON="$PWD/../recomp-kit/.venv/bin/python" \
+  RECOMP_PROFILE_DIR="$PWD/build/ipad-update-runtime-profile" \
+  build/recomp/runtime_tests --startup-contracts
+../recomp-kit/.venv/bin/python tools/build.py --target ios --team <TEAM_ID> --no-install --jobs 6
+```
+
+All five game configuration tests passed. Startup contracts reported 141
+checks, zero failures and one skip. The scripted desktop run completed all
+seven steps and displayed the main menu, with the core plugin supplied through
+`RECOMP_CORE_MODS_DIR=build/MetalFatigueRecomp.app/Contents/Resources/mods/core`.
+The signed iOS app was installed on the connected iPad Pro and its opening
+cinematic was visually confirmed after the renderer lookup fix. Mission input,
+audio output and sustained gameplay were not retested on the iPad.
+
+Local evidence: `build/ipad-update-config-tests.log`,
+`build/ipad-update-smoke/host-with-core.log`,
+`build/ipad-update-smoke/menu.png`, `build/ipad-update-runtime-tests.log`,
+`build/ipad-update-ios-renderer-build.log`,
+`build/ipad-update-renderer-install.json`,
+`build/ipad-update-device-renderer.log` and
+`build/ipad-update-device-renderer.png`. Original assets, app bundles, profiles
+and logs remain private and ignored.
