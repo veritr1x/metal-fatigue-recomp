@@ -31,6 +31,12 @@ consistent. The scaled-font atlas correction is removed so text remains intact.
 The user confirmed the corrected HUD, text, camera and F10 settings behavior.
 Fonts retain the original bitmap artwork; they are not replacement vector fonts.
 
+Touch places the game's own cursor at the touched point. Menus retain their
+640×480 coordinate system at every resolution, while missions use the logical
+renderer canvas. Pending relative motion is cleared after placement so it
+cannot shift the cursor away from the finger; mouse buttons and wheel remain
+independent.
+
 **You need your own copy of the game.** Executables, artwork, audio, movies,
 missions and generated game code are prepared locally and are not included.
 This repository contains the game configuration, reviewed native adaptations,

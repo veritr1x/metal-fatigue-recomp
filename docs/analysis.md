@@ -559,3 +559,69 @@ counted as visual proof. No mission was exercised.
 Evidence: `build/display-mode-smoke-1280/host.log`,
 `build/display-mode-smoke-1280/menu.png`, `build/display-mode-ios-build.log`
 and `build/display-mode-install.json`.
+
+### Absolute touch cursor placement (2026-09-21)
+
+The iPad offset was reproduced locally through the production TouchMapper path.
+A drawable tap at (1000,240) left the menu cursor at approximately (628,470).
+The kit's default guest cursor accessor did not recognize this game's sentinel
+hooks, so only relative movement reached the game's separate cursor integrators.
+
+`native/input.c` implements the optional `recomp_pointer_place` seam from kit
+`eb32cc4`. It validates the live guest objects and places their float cursor
+pairs while the host holds the scheduler baton:
+
+- Input global `005229c0`: `00408300` checks active flag `+10`, reads the mouse
+  interface at `+8`, and stores DIMOUSESTATE at `+14` (X), `+18` (Y), `+1c` (wheel).
+- Menu global `00522a00`: constructor `0041b0c0` installs vtable `004d4e70` and
+  cursor floats `+84/+88`; `0040c67a` publishes the object and binds input at
+  `+90`. Integrator `0041b201` uses a fixed 640×480 menu canvas, clamping to
+  630×470 to leave room for the sprite. Touch coordinates are scaled to that
+  canvas even in HD modes.
+- Mission global `005229f8`: constructor `0047db70` installs vtable `004e1ab8`
+  and publishes the object at `0047de0b`. Integrator `00480e20` reads float
+  cursor `+f0/+f4` in logical renderer pixels, then applies bounds, scrolling
+  and Screen2World picking. Those original operations still run.
+
+The adapter clears cached X/Y and already sampled DirectInput X/Y; the host
+clears unsampled X/Y after successful placement. Button state/history, wheel
+and keyboard input remain intact. Unrecognized objects retain the fallback.
+The original PE images and sentinel hook configuration are unchanged. Byte
+assertions in `tests/test_game_inputs.py` pin the recovered layouts to the EXE.
+
+Validation used fresh profiles under ignored `build/touch-offset-*` directories:
+
+```sh
+../recomp-kit/.venv/bin/python -m pytest -q tests
+../recomp-kit/.venv/bin/python tools/build.py --target smoke --jobs 8
+../recomp-kit/.venv/bin/python tools/test.py --native --jobs 8
+../recomp-kit/.venv/bin/python tools/build.py --target ios --team <TEAM_ID> --no-install --jobs 8
+```
+
+The six repository tests passed; portable kit tests passed 415 with three skips.
+Native input tests passed 68 checks and display
+tests passed 96. The standalone kit native suite passed all 24 tests. The broader
+Metal Fatigue native suite passed 26 of 28: exception delay-load checks in
+`seh_tests` and resource/version/import coverage checks in `runtime_tests`
+failed outside the touch path; this is not an all-green game-suite claim.
+
+The standard-resolution smoke completed 12/12 steps: three tap positions
+matched the visible cursor within two drawable pixels, and tapping Options
+opened that menu. The HD smoke completed 14/14 steps at 1280×720 logical /
+1920×1080 output, with taps at (1000,240), (500,800), and (200,240) again within
+two pixels; a subsequent tap opened campaign selection. The test drawable was
+1280×960, deliberately differing from the HD canvas aspect ratio. Signed iOS
+build and in-place iPad installation succeeded; physical touch confirmation
+remains separate from these automated checks.
+
+A third smoke completed 24/24 steps, selected RimTech on Easy, started its first
+mission, and placed the mission cursor at drawable (1000,240) and (500,600).
+Both gameplay screenshots show the cursor centred at the requested positions.
+This checks menu-to-mission input continuity, not sustained campaign play.
+
+Evidence: `build/touch-offset-before`, `build/touch-offset-after`,
+`build/touch-offset-hd`, `build/touch-offset-mission`,
+`build/touch-offset-native-tests.log`, `build/touch-offset-portable-tests.log`,
+`build/touch-offset-ios-build.log`, `build/touch-offset-install.json`, and
+`build/touch-offset-device.log`. All screenshots, logs, scripts, profiles,
+generated code and game assets remain ignored.

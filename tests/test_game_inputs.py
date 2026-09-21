@@ -85,3 +85,25 @@ def test_display_adaptation_addresses(config):
         0x004d2000: b"RegSetValueExA", 0x004d2008: b"RegFlushKey",
         0x004d200c: b"RegCloseKey", 0x004d2014: b"RegCreateKeyExA",
         0x004d2018: b"RegQueryValueExA"}
+
+
+def test_touch_cursor_layouts(config):
+    pe = load_pe(config["developer_exe_path"])
+    data = lambda address, size: pe.get_data(address - 0x400000, size)
+    # Menu constructor, global publication, input member and float X/Y integrator.
+    assert data(0x0041b109, 18) == bytes.fromhex(
+        "8d9084000000 c700704e4d00 898890000000")
+    assert data(0x0040c67a, 5) == bytes.fromhex("a3002a5200")
+    assert data(0x0041b201, 12) == bytes.fromhex("8b8790000000 8b4814 8b5018")
+    assert data(0x0041b219, 6) == bytes.fromhex("d88784000000")
+    assert data(0x0041b229, 6) == bytes.fromhex("d88788000000")
+    assert struct.unpack("<2f", data(0x004d4b8c, 8)) == (630, 470)
+    # Mission constructor/global and renderer-pixel cursor integrator.
+    assert data(0x0047dc8a, 6) == bytes.fromhex("c706b81a4e00")
+    assert data(0x0047de0b, 6) == bytes.fromhex("8935f8295200")
+    assert data(0x00480e38, 11) == bytes.fromhex("a1c0295200 8b4814 8b4018")
+    assert data(0x00480e47, 6) == bytes.fromhex("8d8ff0000000")
+    assert data(0x00480e5d, 6) == bytes.fromhex("d887f4000000")
+    # Input Read: active flag +0x10, mouse interface +8, DIMOUSESTATE at +0x14.
+    assert data(0x00408303, 3) == bytes.fromhex("8b4610")
+    assert data(0x0040830e, 7) == bytes.fromhex("8b4608 57 8d7e14")

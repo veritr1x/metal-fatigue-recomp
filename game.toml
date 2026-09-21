@@ -25,7 +25,7 @@ overrides = "native/display_overrides.h"
 
 [translate.native]
 header = "native/display_overrides.h"
-sources = ["native/display.c"]
+sources = ["native/display.c", "native/input.c"]
 
 [modules.aux.directx]
 name = "DirectXRendEng.dll"
