@@ -57,7 +57,7 @@ git clone --recurse-submodules https://github.com/veritr1x/metal-fatigue-recomp.
 cd metal-fatigue-recomp
 git submodule update --init
 python3 -m venv .venv
-.venv/bin/python -m pip install -r kit/requirements-dev.txt
+.venv/bin/python -m pip install --require-hashes --only-binary=:all: -r kit/requirements.lock
 .venv/bin/python tools/setup.py --install /path/to/Metal\ Fatigue --link-only
 .venv/bin/python tools/inspect_game.py
 .venv/bin/python tools/analyze.py --ghidra-home /path/to/ghidra_12.1.3_PUBLIC
