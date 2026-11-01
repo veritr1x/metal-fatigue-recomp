@@ -41,10 +41,13 @@ jobs:
       - name: Enter the Visual Studio developer environment (Windows)
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: "22"
       - name: Contributor tools
         run: |
           python3 -m venv .venv
-          ${{ matrix.python }} -m pip install -r kit/requirements-dev.txt
+          ${{ matrix.python }} -m pip install --require-hashes --only-binary=:all: -r kit/requirements.lock
       - name: Portable tests (the kit's suites plus this game's config)
         run: |
           ${{ matrix.python }} tools/check_repo.py
@@ -79,7 +82,7 @@ jobs:
       - name: Contributor tools and pinned Android NDK
         run: |
           python3 -m venv .venv
-          .venv/bin/python -m pip install -r kit/requirements-dev.txt
+          .venv/bin/python -m pip install --require-hashes --only-binary=:all: -r kit/requirements.lock
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;27.2.12479018" "platforms;android-36" "build-tools;37.0.0"
           echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_ENV"
