@@ -22,3 +22,7 @@ with exact commands, observed results and unresolved failures.
 Public CI never receives the game or its generated code. Its stub builds check
 host compilation and linking, not game behavior. Do not upload locally packaged
 game assets or iOS bundles to Actions artifacts or public releases.
+
+Keep `.recomp.json` in sync with the README when project status changes.
+Its format is defined by [recomp.board](https://recomp.fyi/spec) (CC BY 4.0).
+Use only documented status and release evidence; omit unverified fields.
