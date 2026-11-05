@@ -639,3 +639,20 @@ Windows x64/Vulkan: scene captures show vehicle selection and ordered movement (
 These are bounded checks using hash-matched inputs and isolated profiles.
 Movies were disabled; full campaigns, performance and new physical-device
 validation are not established. Original inputs and player saves are preserved.
+
+## 2026-11-05 shared kit and browser streaming refresh
+
+On Windows/Chromium 145 with hardware WebGPU, streaming mounted 877 files,
+loaded the pinned display module and reached campaign selection and mission
+briefing. Mission rendering has severe geometry/presentation artifacts and
+some menu labels are absent. This is not a gameplay pass. Importing the
+prepared staged installation through Import folder produced the same mission
+artifacts with zero streamed asset GETs. The raw installation keeps the pinned
+renderer under `_unsupported`; the prepared bundle stages it at its configured
+root name. No JavaScript exception, failed asset request or WebGPU validation
+error was observed after the shared WGSL fixes. Six portable game tests pass.
+The exact remaining rendering cause and full gameplay remain unresolved.
+
+The real WebAssembly build passes on kit `1cbd81c`; see [web.md](web.md)
+for preparation, source selection and browser limitations. Earlier platform
+results above are historical and were not rerun in full.
