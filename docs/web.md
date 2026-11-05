@@ -48,22 +48,31 @@ recorded below; compilation alone does not establish gameplay.
 
 ## Local validation
 
-Updated to recomp-kit `1cbd81ca8e6e1ef2cf33f1c27a06f69a00e64b82`, including
-upstream main, optional streaming, the corrected fetch backend, and shared
-fixed-function WGSL/empty-transfer fixes. The real Emscripten 6.0.11 game
-build succeeds; this was not a stub build.
+Updated to recomp-kit `9dff77f71928ce55933c6354ee763a8077d17909`. The real
+Emscripten 6.0.11 game build succeeds. Shared changes implement worker-safe
+texture/buffer readback, preserve transfer rectangles across proxy calls,
+handle self-copies and restore depth checkpoints with a depth-only draw.
+The real browser GPU fixture passes 1,004 checks, including device loss,
+padded rows and depth restore values. See the kit's testing guide to rerun it.
 
-On Windows/Chromium 145 with hardware WebGPU, streaming mounted 877 files,
-loaded the pinned display module and reached campaign selection and mission
-briefing. Mission rendering has severe geometry/presentation artifacts and
-some menu labels are absent. This is not a gameplay pass. Importing the
-prepared staged installation through Import folder produced the same mission
-artifacts with zero streamed asset GETs. The raw installation keeps the pinned
-renderer under `_unsupported`; the prepared bundle stages it at its configured
-root name. No JavaScript exception, failed asset request or WebGPU validation
-error was observed after the shared WGSL fixes. Six portable game tests pass.
-The exact remaining rendering cause and full gameplay remain unresolved.
+On Windows/Chromium 145 with hardware WebGPU, the shared transfer fixes
+restore menu labels and the first RimTech mission's terrain, units, HUD,
+minimap and selected MissileCar panel. The previous large triangles, stale
+briefing remnants and missing labels are absent in the observed mission.
+Streamed startup verifies the prepared renderer module, and the OPFS game
+directory stays empty.
 
-These are bounded local checks, not a full playthrough or performance test.
-The 64 MiB limit applies only to the download cache. Local build logs,
-screenshots and browser diagnostics remain in ignored directories.
+The final rebuilt player also imports the prepared 879-file bundle through
+the normal Import folder control, boots source `import`, and reaches the same
+mission with unit-selection panel updates and zero streamed asset GETs.
+Neither mode shows JavaScript exceptions or WebGPU validation errors.
+
+These are bounded rendering and interaction checks. Direct movement-order
+round trips, save/load, full missions, audible output and other browsers are
+not established. Frame rates remain low (roughly 4-10 FPS in this run); the
+rendering fixes are not a playable-performance claim.
+
+Portable project tests pass (6 tests). Private screenshots and diagnostics
+remain under ignored build directories. Historical native/device results
+were not all rerun for this browser update. The 64 MiB streaming bound applies
+to the download cache, not total browser memory.

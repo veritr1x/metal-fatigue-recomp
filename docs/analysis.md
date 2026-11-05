@@ -656,3 +656,25 @@ The exact remaining rendering cause and full gameplay remain unresolved.
 The real WebAssembly build passes on kit `1cbd81c`; see [web.md](web.md)
 for preparation, source selection and browser limitations. Earlier platform
 results above are historical and were not rerun in full.
+
+## 2026-11-05 browser readback and transfer fixes
+
+On Windows/Chromium 145 with hardware WebGPU, the shared transfer fixes
+restore menu labels and the first RimTech mission's terrain, units, HUD,
+minimap and selected MissileCar panel. The previous large triangles, stale
+briefing remnants and missing labels are absent in the observed mission.
+Streamed startup verifies the prepared renderer module, and the OPFS game
+directory stays empty.
+
+The final rebuilt player also imports the prepared 879-file bundle through
+the normal Import folder control, boots source `import`, and reaches the same
+mission with unit-selection panel updates and zero streamed asset GETs.
+Neither mode shows JavaScript exceptions or WebGPU validation errors.
+
+These are bounded rendering and interaction checks. Direct movement-order
+round trips, save/load, full missions, audible output and other browsers are
+not established. Frame rates remain low (roughly 4-10 FPS in these browser checks); the
+rendering fixes are not a playable-performance claim.
+
+Shared kit `9dff77f`; 1,004 real browser GPU checks and six portable
+project tests pass. See [web.md](web.md) for setup and bounded coverage.
